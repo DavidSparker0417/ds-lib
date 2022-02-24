@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import Web3 from 'web3';
 import HDWalletProvider from '@truffle/hdwallet-provider';
-import { routerAbi, tokenAbi } from './default-abi';
+import { routerAbi, tokenAbi } from './default-abi.js';
 
 /***************************************/
 /*          wallet functions           */
@@ -18,7 +18,7 @@ export async function dsWalletConnectInjected(chainId) {
     const[account] = await window.ethereum.request({method: 'eth_requestAccounts'});
     return account;
   } catch (err) {
-      alert(err.message);
+      console.log(err.message);
   }
   return null;
 }
@@ -101,6 +101,33 @@ export async function dsWeb3GetCurrentAccount() {
   const web3 = new Web3(window.web3.currentProvider);
   const accounts = await web3.eth.getAccounts();
   return accounts[0];
+}
+
+// send transaction
+export async function dsWeb3SendTransaction(provider, privateKey, transaction, eth) {
+  const web3 = dsWeb3Get(provider)
+  const gasPrice = await web3.eth.getGasPrice()
+  const account = privateKey === null 
+    ? provider.selectedAddress
+    : web3.eth.accounts.privateKeyToAccount(privateKey).address
+  const gas = await transaction.estimateGas({from:account})
+  if (privateKey === null) {
+    transaction.send({
+      from  : account,
+      value : eth,
+      gas   : gas
+    })
+  } else {
+    const options = {
+      to: transaction._parent._address,
+      data: transaction.encodeABI(),
+      gas: await transaction.estimateGas({from:account}),
+      gasPrice: gasPrice,
+      value: eth
+    }
+    const signed = await web3.eth.accounts.signTransaction(options, privateKey)
+    await web3.eth.sendSignedTransaction(signed.rawTransaction)
+  }
 }
 
 // get token balance
