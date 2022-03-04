@@ -110,7 +110,7 @@ export async function dsWeb3SendTransaction(provider, privateKey, transaction, e
   const account = privateKey === null 
     ? provider.selectedAddress
     : web3.eth.accounts.privateKeyToAccount(privateKey).address
-  const gas = await transaction.estimateGas({from:account})
+  const gas = await transaction.estimateGas({from:account, value:eth})
   if (privateKey === null) {
     transaction.send({
       from  : account,
@@ -121,7 +121,7 @@ export async function dsWeb3SendTransaction(provider, privateKey, transaction, e
     const options = {
       to: transaction._parent._address,
       data: transaction.encodeABI(),
-      gas: await transaction.estimateGas({from:account}),
+      gas: gas,
       gasPrice: gasPrice,
       value: eth
     }
@@ -228,7 +228,7 @@ export function dsBnEthToWei(eth, decimals) {
     return 0;
 
   if (typeof decimals === 'undefined') {
-    weiVal = Web3.utils.toWei(parseFloat(eth).toFixed(18), 'ether');
+    weiVal = Web3.utils.toWei(eth, 'ether');
   }
   else
   {

@@ -1,10 +1,15 @@
 const fs = require('fs')
 
-function dsConfigWrite(file, key, value) {
-  let rawdata = fs.readFileSync(file)
-  const config = JSON.parse(rawdata)
-  config[key] = value
-  rawdata = JSON.stringify(config, null, 2)
+function dsConfigWrite(config, file, key, value) {
+  let rawdata
+  let _config = config
+  if (!config) 
+  {
+    rawdata = fs.readFileSync(file)
+    _config = JSON.parse(rawdata)
+    config[key] = value
+  }
+  rawdata = JSON.stringify(_config, null, 2)
   fs.writeFileSync(file, rawdata)
 }
 
