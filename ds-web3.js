@@ -2,6 +2,7 @@ import {ethers} from 'ethers';
 import Web3 from 'web3';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import { routerAbi, tokenAbi } from './default-abi.js';
+import { any } from 'async';
 
 /***************************************/
 /*          wallet functions           */
@@ -103,6 +104,24 @@ export async function dsWeb3GetCurrentAccount() {
   return accounts[0];
 }
 
+// get account address from private key
+export function dsWeb3GetAddressFromPrivKey(provider, privKey) {
+  const web3 = dsWeb3Get(provider)
+  const address = web3.eth.accounts.privateKeyToAccount(privKey).address
+  return address
+}
+
+// get estimate gas
+export async function dsWeb3EstimateGas(provider, privKey, transaction, eth) {
+  const web3 = dsWeb3Get(provider)
+  const gasPrice = await web3.eth.getGasPrice()
+  const account = privKey === null 
+    ? provider.selectedAddress
+    : web3.eth.accounts.privateKeyToAccount(privKey).address
+  const gas = await transaction.estimateGas({from:account, value:eth})
+  return gas
+}
+
 // send transaction
 export async function dsWeb3SendTransaction(provider, privateKey, transaction, eth) {
   const web3 = dsWeb3Get(provider)
@@ -110,7 +129,7 @@ export async function dsWeb3SendTransaction(provider, privateKey, transaction, e
   const account = privateKey === null 
     ? provider.selectedAddress
     : web3.eth.accounts.privateKeyToAccount(privateKey).address
-  const gas = await transaction.estimateGas({from:account})
+  const gas = await transaction.estimateGas({from:account, value:eth})
   if (privateKey === null) {
     transaction.send({
       from  : account,
@@ -121,18 +140,33 @@ export async function dsWeb3SendTransaction(provider, privateKey, transaction, e
     const options = {
       to: transaction._parent._address,
       data: transaction.encodeABI(),
-      gas: await transaction.estimateGas({from:account}),
+      gas: gas,
       gasPrice: gasPrice,
       value: eth
     }
     const signed = await web3.eth.accounts.signTransaction(options, privateKey)
-    await web3.eth.sendSignedTransaction(signed.rawTransaction)
+    const trResult = await web3.eth.sendSignedTransaction(signed.rawTransaction)
+    const spentGas = trResult.gasUsed * gasPrice
+    // console.log(`[DSWEB3] dsWeb3SendTransaction :: transaction result = `, spentGas)
+    return spentGas
   }
 }
 
+// get eth balance 
+export async function dsWeb3GetBalance(provider, address) {
+  const web3 = dsWeb3Get(provider)
+  return await web3.eth.getBalance(address)
+}
+
 // get token balance
-export async function dsWeb3GetTokenBalance(token, account) {
-  const request = token.methods.balanceOf(account).call()
+export async function dsWeb3GetTokenBalance(token, account, provider) {
+  let contract
+  if (typeof token === 'string') {
+    contract = dsWeb3GetContract(provider, token, tokenAbi)
+  } else {
+    contract = token
+  }
+  const request = contract.methods.balanceOf(account).call()
   let balance = 0
   await request.then(function(recipent) {
     balance = recipent
@@ -140,7 +174,19 @@ export async function dsWeb3GetTokenBalance(token, account) {
     const msg = dsErrMsgGet(error.message)
     console.log(msg)
   })
-  return dsBnWeiToEth(balance)
+  return balance
+}
+
+// send coin
+export async function dsWeb3SendCoin(provider, pKey, to, amount) {
+  const web3 = dsWeb3Get(provider)
+  const options = {
+    to: to,
+    gas: 30000,
+    value: amount
+  }
+  const signed = await web3.eth.accounts.signTransaction(options, pKey)
+  await web3.eth.sendSignedTransaction(signed.rawTransaction)
 }
 
 // get token price
@@ -228,7 +274,7 @@ export function dsBnEthToWei(eth, decimals) {
     return 0;
 
   if (typeof decimals === 'undefined') {
-    weiVal = Web3.utils.toWei(parseFloat(eth).toFixed(18), 'ether');
+    weiVal = Web3.utils.toWei(eth, 'ether');
   }
   else
   {

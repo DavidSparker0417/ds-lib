@@ -1,11 +1,9 @@
-import { isMobile } from 'react-device-detect';
-
 export const log = console.log;
 
 /**********************************************/
 /*          Representing numbers               *
 /**********************************************/
-export const numberWithCommas = ((x:any) => {
+export const numberWithCommas = ((x) => {
     return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 });
   
@@ -29,7 +27,7 @@ export function toHumanizeFixed(x, decimals){
     return x.toFixed(d).replace(/\.?0*$/,'');
 }
 
-export function secondToTimeFormatString(seconds) {
+export function dsUtilSecondToTimeFormatString(seconds) {
     return (
     "0" + Math.floor(seconds/86400)).slice(-3) + ":" +
     ("0" + Math.floor((seconds%86400)/3600)).slice(-2) + ":" + 
@@ -41,6 +39,10 @@ export function dsUtilGenerateRandomNumber(rangeStart, rangeEnd) {
     return rangeStart + Math.random() * (rangeEnd - rangeStart)
 }
 
-export function kutil_isMobileDev() {
-    return isMobile();
+export function dsUtilSec2DateTime(seconds) {
+  const day = seconds / 86400
+  const hour = (seconds % 86400) / 3600
+  const min = (seconds % 3600) / 60
+  const sec = seconds % 60
+  const dateStr = day + " day" + hour + " hour" + min + " min" + sec + " sec"
 }
