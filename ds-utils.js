@@ -37,7 +37,7 @@ export function secondToTimeFormatString(seconds) {
     ("0" + Math.floor(seconds%60)).slice(-2);
 }
 
-export function utilGenerateRandomNumber(rangeStart, rangeEnd) {
+export function dsUtilGenerateRandomNumber(rangeStart, rangeEnd) {
     return rangeStart + Math.random() * (rangeEnd - rangeStart)
 }
 
