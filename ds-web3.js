@@ -2,7 +2,6 @@ import {ethers} from 'ethers';
 import Web3 from 'web3';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import { routerAbi, tokenAbi } from './default-abi.js';
-import { any } from 'async';
 
 /***************************************/
 /*          wallet functions           */
