@@ -131,11 +131,12 @@ export async function dsWeb3SendTransaction(provider, privateKey, transaction, e
     : web3.eth.accounts.privateKeyToAccount(privateKey).address
   const gas = await transaction.estimateGas({from:account, value:eth})
   if (privateKey === null) {
-    transaction.send({
+    const trPending = transaction.send({
       from  : account,
       value : eth,
       gas   : gas
     })
+    return trPending
   } else {
     const options = {
       to: transaction._parent._address,
@@ -217,6 +218,33 @@ export async function dsWeb3GetTokenPrice(provider, token, stableCoin) {
     .catch(function(error) {
       const msg = dsErrMsgGet(error.message)
       console.log(msg)
+    })
+  
+  return price
+}
+
+// get token price
+export async function dsWeb3GetTokenPriceByRouter(provider, router, token, stableCoin) {
+  let priceInWeth
+  let price
+  const contract = dsWeb3GetContract(provider, router, routerAbi)
+  const weth = await contract.methods.WETH().call()
+  await contract.methods
+    .getAmountsOut(dsBnEthToWei("1"), [token, weth]).call()
+      .then(function(recipent) {      
+        priceInWeth = recipent[1]
+      })
+    .catch(function(error) {
+      const msg = dsErrMsgGet(error.message)
+    })
+  
+  await contract.methods
+    .getAmountsOut(priceInWeth, [weth, stableCoin]).call()
+    .then(function(recipent) {      
+      price = recipent[1]
+    })
+    .catch(function(error) {
+      const msg = dsErrMsgGet(error.message)
     })
   
   return price
