@@ -216,15 +216,19 @@ export async function dsWeb3GetTokenPrice(provider, token, stableCoin) {
   return price
 }
 
+export async function dsWeb3GetTokenDecmials(provider, tokenAddr) {
+  const tokenContract = dsWeb3GetContract(provider, tokenAddr, tokenAbi)
+  return await tokenContract.methods.decimals().call()
+}
+
 // get token price
 export async function dsWeb3GetTokenPriceByRouter(provider, router, token, stableCoin, _decimals) {
   let priceInWeth
   let price
   let decimals = _decimals
-  if (decimals === undefined) {
-    const tokenContract = dsWeb3GetContract(provider, token, tokenAbi)
-    decimals = await tokenContract.methods.decimals().call()
-  }
+  if (decimals === undefined)
+    decimals = dsWeb3GetTokenDecmials(provider, token)
+  
   const contract = dsWeb3GetContract(provider, router, routerAbi)
   const weth = await contract.methods.WETH().call()
   priceInWeth = await contract
