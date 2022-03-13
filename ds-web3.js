@@ -9,17 +9,13 @@ import { routerAbi, tokenAbi } from './default-abi.js';
 export async function dsWalletConnectInjected(chainId) {
   if (!window.ethereum)
       throw('No wallet installed on your browser')
-    const strChainId = '0x' + chainId.toString(16);
-    await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: strChainId }],
-    });
-    const[account] = await window.ethereum.request({method: 'eth_requestAccounts'});
-    return account;
-  } catch (err) {
-      console.log(err.message);
-  }
-  return null;
+  const strChainId = '0x' + chainId.toString(16);
+  await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: strChainId }],
+  });
+  const[account] = await window.ethereum.request({method: 'eth_requestAccounts'});
+  return account;
 }
 
 export function dsWalletGetTrimedAccountName(account) {
