@@ -3,6 +3,7 @@ import Web3 from 'web3';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import { routerAbi, tokenAbi } from './default-abi.js';
 
+export const UINT256_MAX = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
 /***************************************/
 /*          wallet functions           */
 /***************************************/
