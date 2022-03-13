@@ -217,31 +217,30 @@ export async function dsWeb3GetTokenPrice(provider, token, stableCoin) {
 }
 
 // get token price
-export async function dsWeb3GetTokenPriceByRouter(provider, router, token, stableCoin) {
+export async function dsWeb3GetTokenPriceByRouter(provider, router, token, stableCoin, decimals) {
   let priceInWeth
   let price
   const contract = dsWeb3GetContract(provider, router, routerAbi)
   const weth = await contract.methods.WETH().call()
-  await contract.methods
-    .getAmountsOut(dsBnEthToWei("1"), [token, weth]).call()
-      .then(function(recipent) {      
-        priceInWeth = recipent[1]
-      })
-    .catch(function(error) {
-      const msg = dsErrMsgGet(error.message)
-    })
+  priceInWeth = await contract
+    .methods
+    .getAmountsOut(dsBnEthToWei("1", decimals), [token, weth]).call()
   
-  await contract.methods
-    .getAmountsOut(priceInWeth, [weth, stableCoin]).call()
-    .then(function(recipent) {      
-      price = recipent[1]
-    })
-    .catch(function(error) {
-      const msg = dsErrMsgGet(error.message)
-    })
-  
+  const amounts = await contract.methods
+    .getAmountsOut(priceInWeth[1], [weth, stableCoin]).call()
+  price = amounts[1]
   return price
 }
+
+// get token price
+export async function dsWeb3GetStableBalance(provider, account, router, stableCoin) {
+  const balance = await dsWeb3GetBalance(provider, account)
+  const contract = dsWeb3GetContract(provider, router, routerAbi)
+  const weth = await contract.methods.WETH().call()
+  const amounts = await contract.methods.getAmountsOut(balance, [weth, stableCoin]).call()
+  return amounts[1]
+}
+
 /***************************************/
 /*       bignumber  functions          */
 /***************************************/
