@@ -232,7 +232,7 @@ export async function dsWeb3GetTokenPriceByRouter(provider, router, token, stabl
   let price
   let decimals = _decimals
   if (decimals === undefined)
-    decimals = dsWeb3GetTokenDecmials(provider, token)
+    decimals = await dsWeb3GetTokenDecmials(provider, token)
   
   const contract = dsWeb3GetContract(provider, router, routerAbi)
   const weth = await contract.methods.WETH().call()
