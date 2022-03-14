@@ -46,6 +46,19 @@ export const tokenAbi = [
     stateMutability: "view",
     type: "function"
   },
+  {
+    inputs: [],
+    name: "symbol",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
 ]
 export const routerAbi = [
   {

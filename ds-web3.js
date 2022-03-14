@@ -222,6 +222,10 @@ export async function dsWeb3GetTokenDecmials(provider, tokenAddr) {
   return await tokenContract.methods.decimals().call()
 }
 
+export async function dsWeb3TokenSymbol(provider, tokenAddr) {
+  const contract = dsWeb3GetContract(provider, tokenAddr, tokenAbi)
+  return await contract.methods.symbol().call()
+}
 // get token price
 export async function dsWeb3GetTokenPriceByRouter(provider, router, token, stableCoin, _decimals) {
   let priceInWeth
