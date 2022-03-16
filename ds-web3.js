@@ -283,6 +283,8 @@ export function dsBnWeiToEth(wei, decimals, precision) {
   else if (typeof decimals === 'string') {
     ethVal = Web3.utils.fromWei(wei, decimals);
   }
+  else if (decimals == 18)
+    ethVal = Web3.utils.fromWei(wei, 'ether');
   else
   {
     const unitEth = getEthUnit(decimals);
