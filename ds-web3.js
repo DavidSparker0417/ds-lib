@@ -4,6 +4,7 @@ import HDWalletProvider from '@truffle/hdwallet-provider';
 import { routerAbi, tokenAbi } from './default-abi.js';
 
 export const UINT256_MAX = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 /***************************************/
 /*          wallet functions           */
 /***************************************/
@@ -273,13 +274,17 @@ export async function dsWeb3GetTokenPriceByRouter(provider, router, token, stabl
 
   const amounts = await contract.methods
     .getAmountsOut(priceInWeth[1], [weth, stableCoin]).call()
-  price = amounts[1]
+
+  decimals = parseInt(await dsWeb3GetTokenDecmials(provider, stableCoin))
+  price = dsBnWeiToEth(amounts[1], decimals)
   return price
 }
 
 // get token price
 export async function dsWeb3GetStableBalance(provider, account, router, stableCoin) {
   const balance = await dsWeb3GetBalance(provider, account)
+  if(balance === "0")
+    return "0"
   const contract = dsWeb3GetContract(provider, router, routerAbi)
   const weth = await contract.methods.WETH().call()
   const amounts = await contract.methods.getAmountsOut(balance, [weth, stableCoin]).call()
