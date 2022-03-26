@@ -2,27 +2,69 @@ import { ethers } from 'ethers';
 import Web3 from 'web3';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import { routerAbi, tokenAbi } from './default-abi.js';
+import CoinbaseWalletSDK from '@coinbase/wallet-sdk';
 
 export const UINT256_MAX = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 /***************************************/
 /*          wallet functions           */
 /***************************************/
-export async function dsWalletConnectInjected(net) {
-  if (!window.ethereum)
+export function dsWalletCoinbaseGetProvider(net) {
+  let ethereum
+  try {
+    const coinbaseWallet = new CoinbaseWalletSDK({
+      appName: "Heal DAPP",
+      appLogoUrl: "",
+      darkMode: false
+    })
+    ethereum = coinbaseWallet.makeWeb3Provider(net.rpc, net.chainId, 1)
+  } catch (e) {
+    console.log(e)
+  }
+  return ethereum
+}
+
+function dsWalletGetProvider(net, connector) {
+  const { ethereum } = window;
+
+  if (!ethereum?.providers) {
+    return ethereum;
+  }
+  let provider
+  switch (connector) {
+    case 'metamask':
+      provider = ethereum.providers.find(({ isMetaMask }) => isMetaMask)
+      break;
+    case 'coinbase':
+      provider = ethereum.providers.find(({ isCoinbaseWallet }) => isCoinbaseWallet);
+      if (!provider) 
+        return dsWalletCoinbaseGetProvider(net)
+      break;
+  }
+  if (provider)
+  {
+    console.log("[dsweb3] provider = ", provider)
+    ethereum.setSelectedProvider(provider)
+  }
+  return ethereum
+}
+
+export async function dsWalletConnectInjected(net, connector) {
+  let ethereum = dsWalletGetProvider(net, connector)
+  if (!ethereum)
     throw ('No wallet installed on your browser')
   const strChainId = '0x' + net.chainId.toString(16);
   try {
-    await window.ethereum.request({
+    await ethereum.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: strChainId }]
     })
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    await ethereum.request({ method: 'eth_requestAccounts' });
   } catch (error) {
     if (error.code === 4902) {
       await dsWalletAddChain(net)
       console.log("[HEAL] dsWalletAddChain ...")
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      await ethereum.request({ method: 'eth_requestAccounts' });
       console.log("[HEAL] Changing net ...")
     } else {
       throw error
@@ -149,11 +191,11 @@ export async function dsWeb3EstimateGas(provider, privKey, transaction, eth) {
 }
 
 // send transaction
-export async function dsWeb3SendTransaction(provider, privateKey, transaction, eth) {
+export async function dsWeb3SendTransaction(provider, privateKey, _account, transaction, eth) {
   const web3 = dsWeb3Get(provider)
   const gasPrice = await web3.eth.getGasPrice()
   const account = privateKey === null
-    ? provider.selectedAddress
+    ? _account
     : web3.eth.accounts.privateKeyToAccount(privateKey).address
   const gas = await transaction.estimateGas({ from: account, value: eth })
   if (privateKey === null) {
@@ -283,12 +325,15 @@ export async function dsWeb3GetTokenPriceByRouter(provider, router, token, stabl
 // get token price
 export async function dsWeb3GetStableBalance(provider, account, router, stableCoin) {
   const balance = await dsWeb3GetBalance(provider, account)
-  if(balance === "0")
+  if (balance === "0")
     return "0"
   const contract = dsWeb3GetContract(provider, router, routerAbi)
   const weth = await contract.methods.WETH().call()
   const amounts = await contract.methods.getAmountsOut(balance, [weth, stableCoin]).call()
-  return amounts[1]
+  const stableDecimals = parseInt(await dsWeb3GetTokenDecmials(provider, stableCoin))
+  const stableBalance = dsBnWeiToEth(amounts[1], stableDecimals)
+  // console.log("[HEAL] STABLE BALANCE = ", stableBalance)
+  return stableBalance
 }
 
 /***************************************/
