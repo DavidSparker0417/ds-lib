@@ -59,6 +59,7 @@ export function dsUtilSec2DateTime(seconds) {
   const min = (seconds % 3600) / 60;
   const sec = seconds % 60;
   const dateStr = day + " day" + hour + " hour" + min + " min" + sec + " sec";
+  return dateStr;
 }
 
 /**********************************************/
