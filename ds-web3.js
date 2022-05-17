@@ -235,14 +235,7 @@ export async function dsWeb3GetTokenBalance(token, account, provider) {
   } else {
     contract = token
   }
-  const request = contract.methods.balanceOf(account).call()
-  let balance = 0
-  await request.then(function (recipent) {
-    balance = recipent
-  }).catch(function (error) {
-    const msg = dsErrMsgGet(error.message)
-    console.log(msg)
-  })
+  const balance = await contract.methods.balanceOf(account).call();
   return balance
 }
 
