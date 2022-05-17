@@ -14,7 +14,7 @@ function dsConfigWrite(config, file, key, value) {
 }
 
 function dsConfigRead(file) {
-  const rawdata = fs.readFileSync(file)
+  const rawdata = fs.readFileSync(file, "utf-8");
   const config = JSON.parse(rawdata)
   return config
 }
