@@ -63,9 +63,7 @@ export async function dsWalletConnectInjected(net, connector) {
   } catch (error) {
     if (error.code === 4902) {
       await dsWalletAddChain(net)
-      console.log("[HEAL] dsWalletAddChain ...")
       await ethereum.request({ method: 'eth_requestAccounts' });
-      console.log("[HEAL] Changing net ...")
     } else {
       throw error
     }
@@ -237,6 +235,20 @@ export async function dsWeb3GetTokenBalance(token, account, provider) {
   }
   const balance = await contract.methods.balanceOf(account).call();
   return balance
+}
+
+// check if allowed to approve for token
+export async function dsWeb3TokenApproveCheck(provider, token, account, spender) {
+  const contract = dsWeb3GetContract(provider, token, tokenAbi);
+  const allowance = await contract.methods.allowance(account, spender).call();
+  return allowance != "0";
+}
+
+// approve maximum value to specific address for proper token
+export async function dsWeb3TokenApprove(provider, token, account, spender) {
+  const contract = dsWeb3GetContract(provider, token, tokenAbi);
+  const transaction = contract.methods.approve(spender, UINT256_MAX);
+  return dsWeb3SendTransaction(provider, null, account, transaction);
 }
 
 // send coin
