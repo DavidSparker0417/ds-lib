@@ -245,10 +245,10 @@ export async function dsWeb3TokenApproveCheck(provider, token, account, spender)
 }
 
 // approve maximum value to specific address for proper token
-export async function dsWeb3TokenApprove(provider, token, account, spender) {
+export async function dsWeb3TokenApprove(provider, privKey, token, account, spender) {
   const contract = dsWeb3GetContract(provider, token, tokenAbi);
   const transaction = contract.methods.approve(spender, UINT256_MAX);
-  return dsWeb3SendTransaction(provider, null, account, transaction);
+  return dsWeb3SendTransaction(provider, privKey, account, transaction);
 }
 
 // send coin
