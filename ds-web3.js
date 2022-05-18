@@ -27,7 +27,7 @@ export function dsWalletCoinbaseGetProvider(net) {
 function dsWalletGetProvider(net, connector) {
   const { ethereum } = window;
 
-  if (!ethereum?.providers) {
+  if (!ethereum || !ethereum.providers) {
     return ethereum;
   }
   let provider
