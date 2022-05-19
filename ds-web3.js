@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import Web3 from 'web3';
-import HDWalletProvider from '@truffle/hdwallet-provider';
+// import HDWalletProvider from '@truffle/hdwallet-provider';
 import { routerAbi, tokenAbi } from './default-abi.js';
 import CoinbaseWalletSDK from '@coinbase/wallet-sdk';
 
@@ -40,6 +40,8 @@ function dsWalletGetProvider(net, connector) {
       if (!provider) 
         return dsWalletCoinbaseGetProvider(net)
       break;
+    default:
+      return null;
   }
   if (provider)
   {
@@ -51,8 +53,8 @@ function dsWalletGetProvider(net, connector) {
 
 export async function dsWalletConnectInjected(net, connector) {
   let ethereum = dsWalletGetProvider(net, connector)
-  if (!ethereum)
-    throw ('No wallet installed on your browser')
+  // if (!ethereum)
+  //   throw ({message: 'No wallet installed on your browser'})
   const strChainId = '0x' + net.chainId.toString(16);
   try {
     await ethereum.request({
@@ -78,20 +80,10 @@ export async function dsWalletAddChain(net) {
   const ethereum = window.ethereum
   const chainId = "0x" + net.chainId.toString(16)
   const data = [{
-    // chainId: '0x38',
     chainId: chainId,
-    // chainName: 'Binance Smart Chain',
     chainName: net.chainName,
-    // nativeCurrency:
-    // {
-    //     name: 'BNB',
-    //     symbol: 'BNB',
-    //     decimals: 18
-    // },
     nativeCurrency: net.nativeCurrency,
-    // rpcUrls: ['https://bsc-dataseed.binance.org/'],
     rpcUrls: [net.rpc],
-    // blockExplorerUrls: ['https://bscscan.com/'],
     blockExplorerUrls: [net.blockExplorerUrl]
   }]
   await ethereum.request({ method: 'wallet_addEthereumChain', params: data })
@@ -135,12 +127,12 @@ export function dsEthersGetContract(addr, abi, isTrReq) {
 /***************************************/
 /*          web3.js  functions         */
 /***************************************/
-export function dsWeb3GetSignedContract(chainId, privateKey, contractAbi, contractAddr) {
-  const provider = new HDWalletProvider(privateKey, chainId);
-  const web3 = new Web3(provider);
-  const contract = new web3.eth.Contract(contractAbi, contractAddr);
-  return contract;
-}
+// export function dsWeb3GetSignedContract(chainId, privateKey, contractAbi, contractAddr) {
+//   const provider = new HDWalletProvider(privateKey, chainId);
+//   const web3 = new Web3(provider);
+//   const contract = new web3.eth.Contract(contractAbi, contractAddr);
+//   return contract;
+// }
 
 /**
  * Get web3 from provider
@@ -180,12 +172,11 @@ export function dsWeb3GetAddressFromPrivKey(provider, privKey) {
 // get estimate gas
 export async function dsWeb3EstimateGas(provider, privKey, transaction, eth) {
   const web3 = dsWeb3Get(provider)
-  const gasPrice = await web3.eth.getGasPrice()
   const account = privKey === null
     ? provider.selectedAddress
     : web3.eth.accounts.privateKeyToAccount(privKey).address
   const gas = await transaction.estimateGas({ from: account, value: eth })
-  return gas
+  return gas;
 }
 
 // send transaction
@@ -241,7 +232,7 @@ export async function dsWeb3GetTokenBalance(token, account, provider) {
 export async function dsWeb3TokenApproveCheck(provider, token, account, spender) {
   const contract = dsWeb3GetContract(provider, token, tokenAbi);
   const allowance = await contract.methods.allowance(account, spender).call();
-  return allowance != "0";
+  return allowance !== "0";
 }
 
 // approve maximum value to specific address for proper token
@@ -305,6 +296,7 @@ export async function dsWeb3TokenSymbol(provider, tokenAddr) {
   const contract = dsWeb3GetContract(provider, tokenAddr, tokenAbi)
   return await contract.methods.symbol().call()
 }
+
 // get token price
 export async function dsWeb3GetTokenPriceByRouter(provider, router, token, stableCoin, _decimals) {
   let priceInWeth
@@ -368,7 +360,7 @@ export function dsBnWeiToEth(wei, decimals, precision) {
   else if (typeof decimals === 'string') {
     ethVal = Web3.utils.fromWei(wei, decimals);
   }
-  else if (decimals == 18)
+  else if (decimals === 18)
     ethVal = Web3.utils.fromWei(wei, 'ether');
   else {
     const unitEth = getEthUnit(decimals);
@@ -376,7 +368,7 @@ export function dsBnWeiToEth(wei, decimals, precision) {
   }
 
   const v = parseFloat(ethVal);
-  if (typeof precision == 'undefined') {
+  if (typeof precision === 'undefined') {
     if (v < 1)
       precision = 8;
     else
