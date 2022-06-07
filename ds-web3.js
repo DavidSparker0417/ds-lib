@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+// import { ethers } from 'ethers';
 import Web3 from 'web3';
 // import HDWalletProvider from '@truffle/hdwallet-provider';
 import { routerAbi, tokenAbi } from './default-abi.js';
@@ -97,32 +97,32 @@ export function dsWeb3IsAddrValid(address) {
   return Web3.utils.isAddress(address);
 }
 
-// get web3 provider
-export function dsEthersGetWeb3Provider() {
-  if (!window.ethereum) {
-    alert("Metamask is not installed.")
-    return null;
-  }
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  return provider;
-}
+// // get web3 provider
+// export function dsEthersGetWeb3Provider() {
+//   if (!window.ethereum) {
+//     alert("Metamask is not installed.")
+//     return null;
+//   }
+//   const provider = new ethers.providers.Web3Provider(window.ethereum);
+//   return provider;
+// }
 
-// get contract object 
-export function dsEthersGetContract(addr, abi, isTrReq) {
-  if (!window.ethereum) {
-    alert("Metamask is not installed.")
-    return;
-  }
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  let contract;
-  if (isTrReq === true) {
-    const signer = provider.getSigner();
-    contract = new ethers.Contract(addr, abi, signer);
-  } else {
-    contract = new ethers.Contract(addr, abi, provider);
-  }
-  return contract;
-}
+// // get contract object 
+// export function dsEthersGetContract(addr, abi, isTrReq) {
+//   if (!window.ethereum) {
+//     alert("Metamask is not installed.")
+//     return;
+//   }
+//   const provider = new ethers.providers.Web3Provider(window.ethereum);
+//   let contract;
+//   if (isTrReq === true) {
+//     const signer = provider.getSigner();
+//     contract = new ethers.Contract(addr, abi, signer);
+//   } else {
+//     contract = new ethers.Contract(addr, abi, provider);
+//   }
+//   return contract;
+// }
 
 /***************************************/
 /*          web3.js  functions         */

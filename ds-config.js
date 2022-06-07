@@ -1,5 +1,8 @@
 const fs = require('fs')
 
+const UINT256_MAX = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+
 function dsConfigWrite(config, file, key, value) {
   let rawdata
   let _config = config
@@ -21,5 +24,7 @@ function dsConfigRead(file) {
 
 module.exports = {
   dsConfigWrite,
-  dsConfigRead
+  dsConfigRead,
+  UINT256_MAX,
+  ZERO_ADDRESS
 }
