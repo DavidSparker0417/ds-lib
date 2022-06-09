@@ -74,6 +74,9 @@ export async function dsWalletAccountFromProvider(provider) {
   return accounts[0];
 }
 
+export function dsWalletTrimedAccount(account) {
+  return account.slice(0, 4) + "..." + account.slice(-4);
+}
 /***************************************/
 /*          ethers.js functions        */
 /***************************************/
