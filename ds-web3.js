@@ -374,11 +374,11 @@ export function dsBnEthToWei(eth, decimals) {
     return 0;
 
   if (typeof decimals === 'undefined') {
-    weiVal = Web3.utils.toWei(eth, 'ether');
+    weiVal = Web3.utils.toWei(eth.toString(), 'ether');
   }
   else {
     const unitEth = getEthUnit(decimals);
-    weiVal = Web3.utils.toWei(parseFloat(eth).toFixed(decimals), unitEth);
+    weiVal = Web3.utils.toWei(parseFloat(eth.toString()).toFixed(decimals), unitEth);
   }
 
   return weiVal;
