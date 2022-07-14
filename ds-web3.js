@@ -206,7 +206,7 @@ export async function dsWeb3SendTransaction(provider, privateKey, _account, tran
     const trResult = await web3.eth.sendSignedTransaction(signed.rawTransaction)
     const spentGas = trResult.gasUsed * gasPrice
     // console.log(`[DSWEB3] dsWeb3SendTransaction :: transaction result = `, spentGas)
-    return spentGas
+    return spentGas.toString();
   }
 }
 
