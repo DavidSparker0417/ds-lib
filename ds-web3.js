@@ -2,28 +2,12 @@
 import Web3 from 'web3';
 // import HDWalletProvider from '@truffle/hdwallet-provider';
 import { routerAbi, tokenAbi } from './default-abi.js';
-import CoinbaseWalletSDK from '@coinbase/wallet-sdk';
 
 export const UINT256_MAX = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 /***************************************/
 /*          wallet functions           */
 /***************************************/
-export function dsWalletCoinbaseGetProvider(net) {
-  let ethereum
-  try {
-    const coinbaseWallet = new CoinbaseWalletSDK({
-      appName: "Heal DAPP",
-      appLogoUrl: "",
-      darkMode: false
-    })
-    ethereum = coinbaseWallet.makeWeb3Provider(net.rpc, net.chainId, 1)
-  } catch (e) {
-    console.log(e)
-  }
-  return ethereum
-}
-
 function dsWalletGetProvider(net, connector) {
   const { ethereum } = window;
 
@@ -34,11 +18,6 @@ function dsWalletGetProvider(net, connector) {
   switch (connector) {
     case 'metamask':
       provider = ethereum.providers.find(({ isMetaMask }) => isMetaMask)
-      break;
-    case 'coinbase':
-      provider = ethereum.providers.find(({ isCoinbaseWallet }) => isCoinbaseWallet);
-      if (!provider) 
-        return dsWalletCoinbaseGetProvider(net)
       break;
     default:
       return null;
@@ -89,6 +68,15 @@ export async function dsWalletAddChain(net) {
   await ethereum.request({ method: 'wallet_addEthereumChain', params: data })
 }
 
+export async function dsWalletAccountFromProvider(provider) {
+  const web3 = dsWeb3Get(provider);
+  const accounts = await web3.eth.getAccounts();
+  return accounts[0];
+}
+
+export function dsWalletTrimedAccount(account) {
+  return account.slice(0, 4) + "..." + account.slice(-4);
+}
 /***************************************/
 /*          ethers.js functions        */
 /***************************************/
