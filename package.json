@@ -1,5 +1,5 @@
 {
-  "name": "ds-lib",
+  "name": "@davidsparker/ds-lib",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
